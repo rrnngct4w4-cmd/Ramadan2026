@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ramadan Quest 2026</title>
+    <style>
+        :root {
+            --neon-cyan: #00f2ff;
+            --neon-pink: #ff00ff;
+            --deep-space: #0d0221;
+            --gold: #ffd700;
+        }
+
+        body {
+            background: var(--deep-space);
+            background-image: linear-gradient(rgba(13, 2, 33, 0.85), rgba(13, 2, 33, 0.85)), 
+                              url('https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=2000');
+            background-size: cover;
+            background-attachment: fixed;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header { text-align: center; margin-bottom: 40px; }
+        h1 { font-size: clamp(2rem, 8vw, 3.5rem); color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan); margin: 0; }
+        .subtitle { color: var(--neon-pink); font-weight: bold; letter-spacing: 2px; }
+
+        /* Grid Setup */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        @media (max-width: 450px) { .calendar-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .day-box {
+            aspect-ratio: 1/1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .day-box:hover {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px var(--neon-pink);
+            transform: translateY(-5px);
+            background: rgba(255, 0, 255, 0.1);
+        }
+
+        /* Modal / Pop-up */
+        .overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 99; backdrop-filter: blur(8px);
+        }
+
+        .modal {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 90%; max-width: 450px;
+            background: #15082e; border: 2px solid var(--neon-cyan);
+            border-radius: 25px; z-index: 100; padding: 30px;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
+            max-height: 85vh; overflow-y: auto;
+        }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .modal-header h2 { color: var(--neon-cyan); margin: 0; }
+
+        .section { margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 15px; border-left: 4px solid var(--neon-pink); }
+        .section-title { font-size: 0.8rem; text-transform: uppercase; color: var(--neon-cyan); display: block; margin-bottom: 8px; font-weight: bold; }
+
+        .tracker-list { list-style: none; padding: 0; margin: 0; }
+        .tracker-list li { margin: 10px 0; display: flex; align-items: center; gap: 10px; }
+
+        input[type="checkbox"] { accent-color: var(--neon-cyan); width: 18px; height: 18px; }
+        input[type="number"] { background: transparent; border: 1px solid var(--neon-cyan); color: white; border-radius: 5px; padding: 5px; width: 60px; }
+
+        .close-btn { background: var(--neon-pink); border: none; color: white; padding: 12px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        .cheer { text-align: center; font-style: italic; color: var(--gold); margin-top: 15px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>RAMADAN 2026</h1>
+        <div class="subtitle">30 DAYS • 30 DEEDS • 1 GOAL</div>
+    </header>
+
+    <div class="calendar-grid" id="mainGrid"></div>
+
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    
+    <div class="modal" id="modal">
+        <div class="modal-header">
+            <h2 id="dayTitle">Day 1</h2>
+            <span id="dateLabel" style="color: #666;">Fast Tracker</span>
+        </div>
+
+        <div class="section">
+            <span class="section-title">✨ Spiritual Focus</span>
+            <p><strong>Dhikr:</strong> <span id="dhikr"></span></p>
+            <p><strong>Dua:</strong> <span id="dua"></span></p>
+        </div>
+
+        <div class="section">
+            <span class="section-title">🕌 Prayer & Quran</span>
+            <ul class="tracker-list">
+                <li><input type="checkbox"> Fajr</li>
+                <li><input type="checkbox"> Dhuhr</li>
+                <li><input type="checkbox"> Asr</li>
+                <li><input type="checkbox"> Maghrib</li>
+                <li><input type="checkbox"> Isha / Taraweeh</li>
+            </ul>
+            <hr style="border: 0.5px solid #333; margin: 15px 0;">
+            <p>📖 Quran: <input type="number" value="0"> mins <small>(Goal: 20m)</small></p>
+        </div>
+
+        <div class="section" style="border-left-color: var(--gold);">
+            <span class="section-title">🌟 Daily Good Deed</span>
+            <p id="deed"></p>
+        </div>
+
+        <p class="cheer" id="cheer"></p>
+        
+        <button class="close-btn" onclick="closeModal()">SAVE PROGRESS</button>
+    </div>
+
+    <script>
+        const ramadanData = {
+            1: { dhikr: "SubhanAllah (100x)", dua: "Ya Allah, accept my fasts.", deed: "Help with Iftar prep today.", cheer: "First step of a beautiful journey!" },
+            2: { dhikr: "Alhamdulillah (100x)", dua: "Ya Allah, increase my patience.", deed: "Clean a room without being asked.", cheer: "Stay hydrated tonight!" },
+            3: { dhikr: "Allahu Akbar (100x)", dua: "Ya Allah, forgive my parents.", deed: "Donate even a small amount to charity.", cheer: "Three days down! You're doing great." },
+            4: { dhikr: "Astaghfirullah (100x)", dua: "Ya Allah, protect me from anger.", deed: "Call a relative you haven't spoken to.", cheer: "Patience is a virtue." },
+            5: { dhikr: "La ilaha illallah", dua: "Ya Allah, grant me Jannah.", deed: "Feed a stray animal or water plants.", cheer: "High five! Day 5!" },
+            6: { dhikr: "SubhanAllahi wa bihamdihi", dua: "Ya Allah, guide my heart.", deed: "Avoid complaining for the whole day.", cheer: "Keep your heart light." },
+            7: { dhikr: "SubhanAllahil Azim", dua: "Ya Allah, ease the world's pain.", deed: "Teach someone a small skill or verse.", cheer: "One week complete! MashAllah!" },
+            8: { dhikr: "Hasbunallahu wa ni'mal wakil", dua: "Ya Allah, I trust Your plan.", deed: "Offer to help a neighbor.", cheer: "Trust the process." },
+            9: { dhikr: "La hawla wala quwwata illa billah", dua: "Ya Allah, give me strength.", deed: "Read 5 extra pages of Quran.", cheer: "Almost at double digits!" },
+            10: { dhikr: "Allahumma salli ala Muhammad", dua: "Ya Allah, grant me peace.", deed: "Forgive someone who hurt you.", cheer: "1/3 of the month is done!" },
+            11: { dhikr: "SubhanAllah", dua: "Ya Allah, cleanse my intentions.", deed: "Prepare a snack for someone else.", cheer: "Second 10 days of Mercy begin!" },
+            12: { dhikr: "Alhamdulillah", dua: "Ya Allah, make me grateful.", deed: "Tidy up your local Masjid or prayer area.", cheer: "Gratitude changes everything." },
+            13: { dhikr: "Astaghfirullah", dua: "Ya Allah, hide my faults.", deed: "Speak only kind words all day.", cheer: "Kindness is a gift." },
+            14: { dhikr: "Ya Hayyu Ya Qayyum", dua: "Ya Allah, rectify my affairs.", deed: "Share a Ramadan quote with a friend.", cheer: "You're halfway there!" },
+            15: { dhikr: "Ya Rahman", dua: "Ya Allah, have mercy on us.", deed: "Lower your gaze and be mindful.", cheer: "Half moon, full heart." },
+            16: { dhikr: "Ya Rahim", dua: "Ya Allah, bless our homes.", deed: "Give up a bad habit for 24 hours.", cheer: "Stronger every day." },
+            17: { dhikr: "Ya Latif", dua: "Ya Allah, be kind to me.", deed: "Make a special Dua for the oppressed.", cheer: "The finish line is in sight." },
+            18: { dhikr: "Ya Wahhab", dua: "Ya Allah, provide for me.", deed: "Help your siblings with their tasks.", cheer: "Energy check! Keep going!" },
+            19: { dhikr: "Ya Ghaffar", dua: "Ya Allah, wash away my sins.", deed: "Write down 5 things you're thankful for.", cheer: "Count your blessings, not hours." },
+            20: { dhikr: "Ya Wadud", dua: "Ya Allah, fill my life with love.", deed: "Sadaqah Jariyah: Plant a seed.", cheer: "Entering the final 10 nights!" },
+            21: { dhikr: "Allahumma innaka 'afuwwun", dua: "Ya Allah, You love to forgive.", deed: "Stay up for extra Dhikr at night.", cheer: "The nights of power are here." },
+            22: { dhikr: "Tuhibbul 'afwa fa'fu 'anni", dua: "Ya Allah, forgive me.", deed: "Donate old clothes or toys.", cheer: "Every moment counts now." },
+            23: { dhikr: "La ilaha illa anta", dua: "Ya Allah, there is no God but You.", deed: "Make water/food available for birds.", cheer: "Focus and pray hard." },
+            24: { dhikr: "Subhanal Malikil Quddus", dua: "Ya Allah, purify my soul.", deed: "Help your parents with Eid planning.", cheer: "Almost there, stay strong!" },
+            25: { dhikr: "Ya Dhal Jalali wal Ikram", dua: "Ya Allah, bless my future.", deed: "Recite Surah Al-Kahf.", cheer: "Beautiful effort, MashAllah." },
+            26: { dhikr: "Allahumma ajirni minan nar", dua: "Ya Allah, save me from the fire.", deed: "Prepare a small gift for a friend.", cheer: "The 27th night approaches." },
+            27: { dhikr: "Astaghfirullahal 'Adhim", dua: "Ya Allah, accept my repentance.", deed: "Pray for the entire Ummah.", cheer: "A night better than 1000 months." },
+            28: { dhikr: "Alhamdulillah", dua: "Ya Allah, don't let this feeling leave.", deed: "Clean your surroundings.", cheer: "Don't slow down now!" },
+            29: { dhikr: "SubhanAllah", dua: "Ya Allah, keep me on the straight path.", deed: "Give Fitrana (Zakat-al-Fitr) early.", cheer: "One final push!" },
+            30: { dhikr: "Allahu Akbar", dua: "Ya Allah, let me see next Ramadan.", deed: "Spread Eid joy to everyone!", cheer: "Eid Mubarak! You did it!" }
+        };
+
+        const grid = document.getElementById('mainGrid');
+        const modal = document.getElementById('modal');
+        const overlay = document.getElementById('overlay');
+
+        for (let i = 1; i <= 30; i++) {
+            const box = document.createElement('div');
+            box.className = 'day-box';
+            box.innerText = i;
+            box.onclick = () => openDay(i);
+            grid.appendChild(box);
+        }
+
+        function openDay(day) {
+            const data = ramadanData[day];
+            document.getElementById('dayTitle').innerText = "Day " + day;
+            document.getElementById('dhikr').innerText = data.dhikr;
+            document.getElementById('dua').innerText = data.dua;
+            document.getElementById('deed').innerText = data.deed;
+            document.getElementById('cheer').innerText = data.cheer;
+            
+            modal.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
